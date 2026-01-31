@@ -1,0 +1,84 @@
+package com.tms.Task_Management_System.services.userServices;
+
+import com.tms.Task_Management_System.Dto.UpdateEmailRequest;
+import com.tms.Task_Management_System.Dto.UserCreateRequest;
+import com.tms.Task_Management_System.Dto.UserCreateResponse;
+import com.tms.Task_Management_System.Enums.IsActive;
+import com.tms.Task_Management_System.ExceptionHandler.DuplicateEmail;
+import com.tms.Task_Management_System.ExceptionHandler.DuplicateMobile;
+import com.tms.Task_Management_System.ExceptionHandler.SecurityError;
+import com.tms.Task_Management_System.entity.userEntity.User;
+import com.tms.Task_Management_System.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class UserServiceImpl implements UserServices {
+    private final ObjectMapper mapper;
+    private final UserRepository userRepository;
+    @Override
+    public ResponseEntity<UserCreateResponse> register(UserCreateRequest userCreateRequest) {
+
+        log.info("Inside register services  ------------> {}",userCreateRequest);
+
+       if(userRepository.existsUserByEmail(userCreateRequest.getEmail()))
+        {
+            throw new DuplicateEmail("Email already register");
+        }
+       if(userRepository.existsUserByMobile(userCreateRequest.getMobile()))
+       {
+           throw new DuplicateMobile("Mobile no is already register");
+       }
+        User user = mapper.convertValue(userCreateRequest,User.class);
+        user.setIsActive(IsActive.True);
+       User saveUser =  userRepository.save(user);
+        UserCreateResponse response =  new UserCreateResponse();
+        response.setUserId(saveUser.getUserId());
+        response.setMessage("User register Successfully");
+        log.info("sending response to controller  ---------------{}",response.getMessage());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    public ResponseEntity<String> UpdateEmail(UpdateEmailRequest updateEmailRequest) {
+        log.info("Inside update email services ---------------->{}",updateEmailRequest);
+
+        boolean exists = userRepository.existsUserByUserId(updateEmailRequest.getUserId());
+        if(exists == false)
+        {
+            throw new SecurityError("SECURITY ERROR : INVALID USER");
+        }
+        if(!userRepository.existsUserByEmail(updateEmailRequest.getOldEmail()))
+        {
+            throw new DuplicateEmail("User with email not found");
+        }
+        if(updateEmailRequest.getOldEmail().contains(updateEmailRequest.getNewEmail()))
+        {
+            throw new DuplicateEmail("Old and New Email can not be same");
+        }
+        if(userRepository.existsUserByEmail(updateEmailRequest.getNewEmail()))
+        {
+            throw new DuplicateEmail("Email exist with another user -----> "+updateEmailRequest.getNewEmail());
+        }
+        Optional<User> result = userRepository.findByEmailAndUserId(updateEmailRequest.getOldEmail(),updateEmailRequest.getUserId());
+        if(result.isEmpty())
+        {
+            throw new SecurityException("User with userid and email not found");
+        }
+        User user = result.get();
+        user.setEmail(updateEmailRequest.getNewEmail());
+        userRepository.save(user);
+        log.info("Sending response back to controller ---------->  Email updated Successfully");
+        return ResponseEntity.status(HttpStatus.OK).body("Email updated Successfully");
+    }
+
+
+}
