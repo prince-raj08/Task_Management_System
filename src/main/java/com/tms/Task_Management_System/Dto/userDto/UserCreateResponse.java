@@ -1,4 +1,4 @@
-package com.tms.Task_Management_System.Dto;
+package com.tms.Task_Management_System.Dto.userDto;
 
 import lombok.Data;
 

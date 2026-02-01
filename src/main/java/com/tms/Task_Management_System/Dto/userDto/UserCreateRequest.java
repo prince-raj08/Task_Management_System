@@ -1,4 +1,4 @@
-package com.tms.Task_Management_System.Dto;
+package com.tms.Task_Management_System.Dto.userDto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +11,7 @@ public class UserCreateRequest {
     @NotBlank
     @Length(min = 3, max = 50, message = "Name can not be blank")
     private String userName;
-    @Email(message = "Invalid email", regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$\n")
+    @Email(message = "Invalid email")
     private String email;
     @Length(min = 10, max=10, message = "Mobile not should be 10 digits")
     private String mobile;
