@@ -1,8 +1,12 @@
 package com.tms.Task_Management_System.entity.userEntity;
 
 import com.tms.Task_Management_System.Enums.IsActive;
+import com.tms.Task_Management_System.entity.taskEntity.Task;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.core.SpringVersion;
+
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -22,5 +26,8 @@ public class User {
     private String password;
     @Enumerated(EnumType.STRING)
     private IsActive isActive;
+
+    @OneToMany(mappedBy = "user")
+    private List<Task> task;
 
 }
