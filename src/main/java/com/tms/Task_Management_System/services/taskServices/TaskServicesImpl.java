@@ -1,8 +1,6 @@
 package com.tms.Task_Management_System.services.taskServices;
 
-import com.tms.Task_Management_System.Dto.taskDto.CreateTaskRequest;
-import com.tms.Task_Management_System.Dto.taskDto.CreateTaskResponse;
-import com.tms.Task_Management_System.Dto.taskDto.UserTaskResponse;
+import com.tms.Task_Management_System.Dto.taskDto.*;
 import com.tms.Task_Management_System.Dto.userDto.UserCreateResponse;
 import com.tms.Task_Management_System.Enums.Status;
 import com.tms.Task_Management_System.ExceptionHandler.SecurityError;
@@ -17,6 +15,8 @@ import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,4 +41,37 @@ public class TaskServicesImpl implements TaskServices{
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @Override
+    public ResponseEntity<TaskResponse> getTaskById(Long taskId,Long userId) {
+        User user = userRepository.findByUserId(userId).orElseThrow(()-> new SecurityError("User not exist"));
+        Task task = taskRepository.findByTaskId(taskId).orElseThrow(() -> new RuntimeException("Invalid task id"));
+        TaskResponse response = mapper.convertValue(task,TaskResponse.class);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @Override
+    public ResponseEntity<List<TaskResponse>> getAllTask(Long userId) {
+        User user = userRepository.findByUserId(userId).orElseThrow(()-> new SecurityError("User not exist"));
+        List<Task> taskList = taskRepository.findAll();
+        List<TaskResponse> responsesList = new ArrayList<>();
+        for(Task t: taskList)
+        {
+            TaskResponse result = mapper.convertValue(t,TaskResponse.class);
+            responsesList.add(result);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responsesList);
+    }
+
+    @Override
+    public ResponseEntity<String> updateTaskById(Long taskId, Long useId, UpdateTaskRequest updateTaskRequest) {
+        User user=userRepository.findByUserId(useId).orElseThrow(()-> new SecurityError("User not exist"));
+        Task task = taskRepository.findByTaskId(taskId).orElseThrow(()-> new RuntimeException("task not found"));
+        task.setTittle(updateTaskRequest.getTittle());
+        task.setDescription(updateTaskRequest.getDescription());
+        task.setStatus(updateTaskRequest.getStatus());
+        taskRepository.save(task);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Task updated Successfully");
+    }
+
 }
