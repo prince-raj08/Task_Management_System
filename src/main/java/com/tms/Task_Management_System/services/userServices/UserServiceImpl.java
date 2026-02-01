@@ -107,7 +107,7 @@ public class UserServiceImpl implements UserServices {
                         new SecurityException("User with userid and mobile no not found")
                 );
 
-        user.setEmail(updateMobileRequest.getNewMobile());
+        user.setMobile(updateMobileRequest.getNewMobile());
         userRepository.save(user);
         log.info("Sending response back to controller ---------->  Mobile no updated Successfully");
         return ResponseEntity.status(HttpStatus.OK).body("Mobile updated Successfully");
