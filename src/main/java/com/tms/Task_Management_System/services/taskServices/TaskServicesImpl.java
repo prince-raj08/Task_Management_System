@@ -1,7 +1,6 @@
 package com.tms.Task_Management_System.services.taskServices;
 
 import com.tms.Task_Management_System.Dto.taskDto.*;
-import com.tms.Task_Management_System.Dto.userDto.UserCreateResponse;
 import com.tms.Task_Management_System.Enums.Status;
 import com.tms.Task_Management_System.ExceptionHandler.SecurityError;
 import com.tms.Task_Management_System.entity.taskEntity.Task;
@@ -9,6 +8,7 @@ import com.tms.Task_Management_System.entity.userEntity.User;
 import com.tms.Task_Management_System.repositories.TaskRepository;
 import com.tms.Task_Management_System.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskServicesImpl implements TaskServices{
@@ -26,6 +27,8 @@ public class TaskServicesImpl implements TaskServices{
     private final ObjectMapper mapper;
     @Override
     public ResponseEntity<CreateTaskResponse> createTask(CreateTaskRequest createTaskRequest) {
+        log.info("Inside create Task services  ------------------------------>{}",createTaskRequest);
+
         User user = userRepository.findByUserId(createTaskRequest.getUserId()).orElseThrow(()-> new SecurityError("User not exist"));
         Task task = mapper.convertValue(createTaskRequest,Task.class);
         task.setStatus(Status.TODO);
@@ -38,6 +41,8 @@ public class TaskServicesImpl implements TaskServices{
 
         CreateTaskResponse response = mapper.convertValue(savedTask,CreateTaskResponse.class);
         response.setUser(result);
+
+        log.info("sending response back to the create task controller");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

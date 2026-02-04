@@ -1,9 +1,13 @@
 package com.tms.Task_Management_System.entity.taskEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tms.Task_Management_System.Enums.Status;
+import com.tms.Task_Management_System.entity.commentEntity.Comment;
 import com.tms.Task_Management_System.entity.userEntity.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+
+import java.util.List;
 
 
 @Data
@@ -26,7 +30,13 @@ public class Task {
     @Column(name = "updatedAt",nullable = false)
     private String updatedAt;
     @JsonIgnore
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user")
     private User user;
+
+    @ToString.Exclude
+    @JsonIgnore
+    @OneToMany(mappedBy = "task")
+    private List<Comment> comment;
 }

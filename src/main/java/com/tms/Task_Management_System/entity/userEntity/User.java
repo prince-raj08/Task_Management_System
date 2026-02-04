@@ -1,9 +1,12 @@
 package com.tms.Task_Management_System.entity.userEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tms.Task_Management_System.Enums.IsActive;
+import com.tms.Task_Management_System.entity.commentEntity.Comment;
 import com.tms.Task_Management_System.entity.taskEntity.Task;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.core.SpringVersion;
 
 import java.util.List;
@@ -26,8 +29,12 @@ public class User {
     private String password;
     @Enumerated(EnumType.STRING)
     private IsActive isActive;
-
+    @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "user")
     private List<Task> task;
+    @JsonIgnore
+    @OneToMany(mappedBy = "user")
+    private List<Comment> comments;
 
 }
