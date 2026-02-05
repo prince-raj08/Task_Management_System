@@ -2,6 +2,7 @@ package com.tms.Task_Management_System.services.commentServices;
 
 import com.tms.Task_Management_System.Dto.commentDto.CreateCommentRequest;
 import com.tms.Task_Management_System.Dto.commentDto.CreateCommentResponse;
+import com.tms.Task_Management_System.Dto.commentDto.GetCommentResponse;
 import com.tms.Task_Management_System.ExceptionHandler.SecurityError;
 import com.tms.Task_Management_System.entity.commentEntity.Comment;
 import com.tms.Task_Management_System.entity.taskEntity.Task;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -46,5 +50,22 @@ public class CommetServicesImpl implements CommentService {
         log.info("Sending response to the add comment controller");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    public ResponseEntity<List<GetCommentResponse>> getCommentByTaskId(Long taskId) {
+
+        log.info("Inside get comment by task id services ------------------------->{}",taskId);
+        Task task = taskRepository.findByTaskId(taskId).orElseThrow(()-> new SecurityError("Task not found"));
+
+        List<Comment> comment = commentRepository.findByTask(task).orElseThrow(()-> new SecurityError("Comment not found"));
+        List<GetCommentResponse> responseList  = new ArrayList<>();
+        for(Comment c : comment)
+        {
+            GetCommentResponse response = mapper.convertValue(c,GetCommentResponse.class);
+            responseList.add(response);
+        }
+        log.info("Sending response to the get comment by task id controller ---------------------{}", responseList);
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 }
